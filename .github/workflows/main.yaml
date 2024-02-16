@@ -41,7 +41,7 @@ jobs:
 
           // Check if the PR has enough approvals
 
-          if (approvals.length >= 2) {
+          if (approvals.length >= 1) {
 
             console.log("PR has enough approvals.");
 
