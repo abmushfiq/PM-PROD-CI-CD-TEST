@@ -18,27 +18,27 @@ jobs:
         run: echo Hello, world!
 
   DeployDev:
-    name: Deploy to Dev
+    name: Deploy to qa and qa test
     if: github.event_name == 'pull_request'
     needs:
       - Build
     runs-on: ubuntu-latest
     environment:
       name: Development
-      url: http://dev.progressmagic.com
+      url: http://qa.progressmagic.com
     steps:
       - name: Deploy
         run: echo I am deploying!
-        
+
   DeployStaging:
-    name: Deploy to Staging
-    if: github.event.ref == 'refs/heads/main' || github.event.ref == 'refs/heads/qa'
+    name: Deploy to Uat and Test Uat
+    if: github.event.ref == 'refs/heads/uat'
     needs:
       - Build
     runs-on: ubuntu-latest
     environment:
       name: Staging
-      url: http://stagging.progressmagic.com
+      url: http://uat.progressmagic.com
     steps:
       - name: Deploy
         run: echo I am deploying!
@@ -46,7 +46,8 @@ jobs:
   DeployProd:
     name: Deploy to Production
     needs:
-      - DeployStaging
+      - Build
+    if: github.event.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment:
       name: Production
