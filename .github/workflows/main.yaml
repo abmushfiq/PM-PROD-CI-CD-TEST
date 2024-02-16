@@ -1,53 +1,56 @@
-name: PR Review Check
-
-on:
-  pull_request_review:
-    types: [submitted, edited, dismissed]
+name: CI + CD
+'on':
+  push:
     branches:
-      - develop
       - qa
-      - uat
       - main
-  pull_request_target:
-    types: [opened, synchronize, reopened]
+  pull_request:
     branches:
-      - develop
       - qa
-      - uat
       - main
-
+  workflow_dispatch: null
 jobs:
-  check-reviews:
+  Build:
     runs-on: ubuntu-latest
     steps:
-    - name: Check PR for approvals
-      uses: actions/github-script@v5
-      with:
-        script: |
-          const prNumber = github.context.payload.pull_request.number;
-          const owner = github.context.repo.owner;
-          const repo = github.context.repo.repo;
+      - uses: actions/checkout@v2
+      - name: Compile
+        run: echo Hello, world!
 
-          // Fetch PR Reviews
-          const reviews = await github.rest.pulls.listReviews({
-            owner: owner,
-            repo: repo,
-            pull_number: prNumber,
-          });
+  DeployDev:
+    name: Deploy to Dev
+    if: github.event_name == 'pull_request'
+    needs:
+      - Build
+    runs-on: ubuntu-latest
+    environment:
+      name: Development
+      url: http://dev.progressmagic.com
+    steps:
+      - name: Deploy
+        run: echo I am deploying!
+        
+  DeployStaging:
+    name: Deploy to Staging
+    if: github.event.ref == 'refs/heads/main' || github.event.ref == 'refs/heads/qa'
+    needs:
+      - Build
+    runs-on: ubuntu-latest
+    environment:
+      name: Staging
+      url: http://stagging.progressmagic.com
+    steps:
+      - name: Deploy
+        run: echo I am deploying!
 
-          const approvals = reviews.data.filter(review => review.state === 'APPROVED');
-
-          // Check if the PR has enough approvals
-          if (approvals.length >= 2) {
-            console.log("PR has enough approvals.");
-            // Implement any additional logic you want here
-          } else {
-            console.log("Not enough approvals. Reminder or notification logic can be added here.");
-            // For example, adding a comment to remind about the review policy
-            await github.rest.issues.createComment({
-              owner: owner,
-              repo: repo,
-              issue_number: prNumber,
-              body: 'This PR requires 2 approvals before merging. Please review it.',
-            });
-          }
+  DeployProd:
+    name: Deploy to Production
+    needs:
+      - DeployStaging
+    runs-on: ubuntu-latest
+    environment:
+      name: Production
+      url: http://app.progressmagic.com
+    steps:
+      - name: Deploy
+        run: echo I am deploying!
