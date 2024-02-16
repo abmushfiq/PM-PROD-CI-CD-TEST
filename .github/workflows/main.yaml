@@ -24,8 +24,6 @@ jobs:
       uses: actions/github-script@v5
       with:
         script: |
-          const github = require('@actions/github');
-          const core = require('@actions/core');
           const prNumber = github.context.payload.pull_request.number;
           const owner = github.context.repo.owner;
           const repo = github.context.repo.repo;
@@ -40,19 +38,12 @@ jobs:
           const approvals = reviews.data.filter(review => review.state === 'APPROVED');
 
           // Check if the PR has enough approvals
-
           if (approvals.length >= 2) {
-
             console.log("PR has enough approvals.");
-
             // Implement any additional logic you want here
-
           } else {
-
             console.log("Not enough approvals. Reminder or notification logic can be added here.");
-
             // For example, adding a comment to remind about the review policy
-
             await github.rest.issues.createComment({
               owner: owner,
               repo: repo,
