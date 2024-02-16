@@ -3,15 +3,9 @@ name: CI + CD
   push:
     tags:
       - 'v*'
-    branches:
-      - qa
-      - main
   pull_request:
     tags:
       - 'v*'
-    branches:
-      - qa
-      - main
   workflow_dispatch: null
 jobs:
   Build:
