@@ -2,9 +2,11 @@ name: CI + CD
 'on':
   push:
     branches:
+      - qa
       - main
   pull_request:
     branches:
+      - qa
       - main
   workflow_dispatch: null
 jobs:
