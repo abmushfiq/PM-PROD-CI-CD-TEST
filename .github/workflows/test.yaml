@@ -11,6 +11,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # Fetch all history for all tags and branches
+
+      - name: Fetch all history
+        run: git fetch --prune --unshallow
       
       - name: Check if tag is on main branch
         id: check-branch
