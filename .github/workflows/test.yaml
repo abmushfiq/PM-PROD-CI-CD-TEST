@@ -8,6 +8,8 @@ on:
 jobs:
   check-main-branch:
     runs-on: ubuntu-latest
+    outputs:
+      proceed: ${{ steps.verify_tag.outputs.proceed }} 
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -29,7 +31,7 @@ jobs:
 
   build-and-deploy:
     needs: check-main-branch
-    if: needs.check-main-branch.outputs.proceed == 'yes'
+    if: ${{ needs.check-main-branch.outputs.proceed == 'yes' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
