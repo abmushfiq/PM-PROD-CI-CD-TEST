@@ -29,13 +29,25 @@ jobs:
             echo "::set-output name=proceed::no"
           fi
 
-  build-and-deploy:
+  DeployStaging:
+    name: Deploy to Uat and Test Uat
     needs: check-main-branch
     if: ${{ needs.check-main-branch.outputs.proceed == 'yes' }}
     runs-on: ubuntu-latest
+    environment:
+      name: Staging to uat
+      url: http://uat.progressmagic.com
     steps:
-      - uses: actions/checkout@v2
-      - name: Build
-        run: echo "Run your build script here."
       - name: Deploy
-        run: echo "Run your deployment script here."
+        run: echo I am deploying!
+
+  build-and-deploy:
+    needs: [check-main-branch, DeployStaging]
+    if: ${{ needs.check-main-branch.outputs.proceed == 'yes' }}
+    runs-on: ubuntu-latest
+    environment:
+      name: Production
+      url: http://app.progressmagic.com
+    steps:
+      - name: Deploy
+        run: echo I am deploying!
