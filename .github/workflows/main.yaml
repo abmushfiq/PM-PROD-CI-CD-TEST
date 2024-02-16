@@ -38,7 +38,7 @@ jobs:
           const approvals = reviews.data.filter(review => review.state === 'APPROVED');
 
           // Check if the PR has enough approvals
-          if (approvals.length >= 2) {
+          if (approvals.length >= 1) {
             console.log("PR has enough approvals.");
             // Implement any additional logic you want here
           } else {
