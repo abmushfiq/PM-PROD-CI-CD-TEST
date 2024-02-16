@@ -16,6 +16,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Compile
         run: echo Hello, world!
+
   DeployDev:
     name: Deploy to Dev
     if: github.event_name == 'pull_request'
@@ -28,6 +29,7 @@ jobs:
     steps:
       - name: Deploy
         run: echo I am deploying!
+        
   DeployStaging:
     name: Deploy to Staging
     if: github.event.ref == 'refs/heads/main' || github.event.ref == 'refs/heads/qa'
@@ -40,7 +42,7 @@ jobs:
     steps:
       - name: Deploy
         run: echo I am deploying!
-        
+
   DeployProd:
     name: Deploy to Production
     needs:
