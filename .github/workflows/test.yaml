@@ -1,0 +1,37 @@
+name: CI/CD Pipeline on Tag Creation from Main Branch
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  check-main-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      
+      - name: Check if tag is on main branch
+        id: check-branch
+        run: |
+          TAG_COMMIT=$(git rev-list -n 1 ${{ github.ref }})
+          MAIN_COMMIT=$(git rev-parse origin/main)
+          if [[ "$TAG_COMMIT" == "$MAIN_COMMIT" ]]; then
+            echo "Tag is on main branch."
+            echo "::set-output name=on_main::true"
+          else
+            echo "Tag is not on main branch."
+            echo "::set-output name=on_main::false"
+          fi
+
+  build-and-deploy:
+    needs: check-main-branch
+    if: needs.check-main-branch.outputs.on_main == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build
+        run: echo "Run your build script here."
+      - name: Deploy
+        run: echo "Run your deployment script here."
