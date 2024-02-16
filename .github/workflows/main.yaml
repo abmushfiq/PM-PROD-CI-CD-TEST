@@ -1,0 +1,57 @@
+name: PR Review Check
+
+on:
+  pull_request_review:
+    types: [submitted, edited, dismissed]
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+  branches:
+      - dev
+      - qa
+      - uat
+      - main
+
+jobs:
+  check-reviews:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check PR for approvals
+      uses: actions/github-script@v5
+      with:
+        script: |
+          const github = require('@actions/github');
+          const core = require('@actions/core');
+          const prNumber = github.context.payload.pull_request.number;
+          const owner = github.context.repo.owner;
+          const repo = github.context.repo.repo;
+
+          // Fetch PR Reviews
+          const reviews = await github.rest.pulls.listReviews({
+            owner: owner,
+            repo: repo,
+            pull_number: prNumber,
+          });
+
+          const approvals = reviews.data.filter(review => review.state === 'APPROVED');
+
+          // Check if the PR has enough approvals
+          
+          if (approvals.length >= 2) {
+
+            console.log("PR has enough approvals.");
+
+            // Implement any additional logic you want here
+
+          } else {
+
+            console.log("Not enough approvals. Reminder or notification logic can be added here.");
+
+            // For example, adding a comment to remind about the review policy
+
+            await github.rest.issues.createComment({
+              owner: owner,
+              repo: repo,
+              issue_number: prNumber,
+              body: 'This PR requires 2 approvals before merging. Please review it.',
+            });
+          }
