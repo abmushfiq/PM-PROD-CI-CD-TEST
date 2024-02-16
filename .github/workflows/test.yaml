@@ -29,7 +29,7 @@ jobs:
 
   build-and-deploy:
     needs: check-main-branch
-    if: needs.check-main-branch.outputs.on_main == 'true'
+    if: needs.check-main-branch.outputs.proceed == 'yes'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
