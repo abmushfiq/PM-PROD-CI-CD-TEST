@@ -1,10 +1,14 @@
 name: CI + CD
 'on':
   push:
+    tags:
+      - 'v*'
     branches:
       - qa
       - main
   pull_request:
+    tags:
+      - 'v*'
     branches:
       - qa
       - main
