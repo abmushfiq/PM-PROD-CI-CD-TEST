@@ -1,0 +1,34 @@
+name: Rollback to Specific Tag
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to rollback to'
+        required: true
+        type: string
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        ref: refs/tags/${{ github.event.inputs.tag }}
+
+    # Add steps to rollback to the specified tag
+    - name: Setup Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'  # Adjust as needed
+
+    - name: Install Dependencies
+      run: npm install
+
+    - name: Build
+      run: npm run build  # Replace with your build command
+
+    - name: Deploy (Rollback)
+      run: |
+        # Add your deployment (rollback) commands here
+        # This might involve SSH commands, scripts, etc.
