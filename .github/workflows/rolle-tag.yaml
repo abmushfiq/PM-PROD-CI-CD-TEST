@@ -1,4 +1,4 @@
-name: [Production Deployment]-${{ github.event.inputs.tag }}
+name: [Production Deployment]
 
 on:
   workflow_dispatch:
