@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Tag to rollback to'
+        description: 'Tag Your Production Version'
         required: true
         type: string
 
