@@ -1,4 +1,4 @@
-name: Rollback to Specific Tag
+name: [Production Deployment]-${{ github.event.inputs.tag }}
 
 on:
   workflow_dispatch:
