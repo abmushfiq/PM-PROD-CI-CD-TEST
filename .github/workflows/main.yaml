@@ -2,10 +2,10 @@ name: CI + CD
 'on':
   push:
     tags:
-      - 'v*'
+      - '*'
   pull_request:
     tags:
-      - 'v*'
+      - '*'
   workflow_dispatch: null
 jobs:
   Build:
