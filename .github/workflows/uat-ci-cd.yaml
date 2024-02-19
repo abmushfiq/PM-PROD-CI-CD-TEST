@@ -1,4 +1,4 @@
-name: Production Deployment
+name: UAT Deployment
 
 on:
   workflow_dispatch:
@@ -12,8 +12,8 @@ jobs:
   rollback:
     runs-on: ubuntu-latest
     environment:
-      name: Production
-      url: http://app.progressmagic.com
+      name: Staging to uat
+      url: http://demo.progressmagic.com
     steps:
     - uses: actions/checkout@v2
       with:
@@ -25,9 +25,9 @@ jobs:
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
-        aws-access-key-id: ${{ secrets.ACCESS_KEY_ID_PROD }}
-        aws-secret-access-key: ${{ secrets.SECRET_ACCESS_KEY_PROD }}
-        aws-region: ${{ secrets.REGION_PROD }}
+        aws-access-key-id: ${{ secrets.ACCESS_KEY_ID_UAT }}
+        aws-secret-access-key: ${{ secrets.SECRET_ACCESS_KEY_UAT }}
+        aws-region: ${{ secrets.REGION_UAT }}
 
     - name: Create JSON File
       working-directory: ./
@@ -37,7 +37,7 @@ jobs:
         echo -n "$SECRET_JSON_VALUE" > int-progress-magic-dev-firebase-adminsdk.json
 
     - name: Fetch ECS task definition
-      run: aws ecs describe-task-definition --task-definition ${{ secrets.ECS_TASK_DEFINITION_PROD }} --query taskDefinition > task-definition.json
+      run: aws ecs describe-task-definition --task-definition ${{ secrets.ECS_TASK_DEFINITION_UAT }} --query taskDefinition > task-definition.json
 
     - name: Login to Amazon ECR
       id: login-ecr
@@ -49,20 +49,20 @@ jobs:
       with:
         context: .
         push: true
-        tags: ${{ secrets.ACCOUNT_ID_PROD }}.dkr.ecr.${{ secrets.REGION_PROD }}.amazonaws.com/${{ secrets.ECR_REPO_NAME_PROD }}:latest
+        tags: ${{ secrets.ACCOUNT_ID_UAT }}.dkr.ecr.${{ secrets.REGION_UAT }}.amazonaws.com/${{ secrets.ECR_REPO_NAME_UAT }}:latest
 
     - name: Update and register ECS task definition with new image
       id: task-def
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
         task-definition: task-definition.json
-        container-name: ${{ secrets.CONTAINER_NAME_PROD }}
-        image: ${{ secrets.ACCOUNT_ID_PROD }}.dkr.ecr.${{ secrets.REGION_PROD }}.amazonaws.com/${{ secrets.ECR_REPO_NAME_PROD }}:latest
+        container-name: ${{ secrets.CONTAINER_NAME_UAT }}
+        image: ${{ secrets.ACCOUNT_ID_UAT }}.dkr.ecr.${{ secrets.REGION_UAT }}.amazonaws.com/${{ secrets.ECR_REPO_NAME_UAT }}:latest
 
     - name: Deploy Amazon ECS task definition
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
         task-definition: ${{ steps.task-def.outputs.task-definition }}
-        service: ${{ secrets.ECS_SERVICE_NAME_PROD }}
-        cluster: ${{ secrets.ECS_CLUSTER_NAME_PROD }}
+        service: ${{ secrets.ECS_SERVICE_NAME_UAT }}
+        cluster: ${{ secrets.ECS_CLUSTER_NAME_UAT }}
         wait-for-service-stability: true
