@@ -1,0 +1,56 @@
+name: Production Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag Your Production Version'
+        required: true
+        type: string
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    environment:
+      name: Production
+      url: http://app.progressmagic.com
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        ref: refs/tags/${{ github.event.inputs.tag }}
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '18'
+
+    - name: Install Dependencies & Build App
+      run: |
+        npm install
+        npm run build
+      env:
+        REACT_APP_GRAPHQL_ENDPOINT: ${{ vars.REACT_APP_GRAPHQL_ENDPOINT_PROD }}
+        REACT_APP_MEDIA_FILES_BASE_URL: ${{ vars.REACT_APP_MEDIA_FILES_BASE_URL_PROD }}
+        REACT_APP_WS_ENDPOINT: ${{ vars.REACT_APP_WS_ENDPOINT_PROD }}
+        REACT_APP_AUTH_SERVICE: ${{ vars.REACT_APP_AUTH_SERVICE_PROD }}
+        REACT_APP_TWAK_PROPERTY_ID: ${{ secrets.REACT_APP_TWAK_PROPERTY_ID_PROD }}
+        REACT_APP_TWAK_WIDGET_ID_ENGLISH: ${{ secrets.REACT_APP_TWAK_WIDGET_ID_ENGLISH_PROD }}
+        REACT_APP_TWAK_WIDGET_ID_PORTUGUES: ${{ secrets.REACT_APP_TWAK_WIDGET_ID_PORTUGUES_PROD }}
+        REACT_APP_TWAK_SITE_API_KEY: ${{ secrets.REACT_APP_TWAK_SITE_API_KEY_PROD }}
+        REACT_APP_GOOGLE_API_KEY: ${{ secrets.REACT_APP_GOOGLE_API_KEY_PROD }}
+        REACT_APP_SPEECH_SILENCE_TIMEOUT: ${{ vars.REACT_APP_SPEECH_SILENCE_TIMEOUT_PROD }}
+        REACT_APP_SPEECH_TO_TEXT_WS_ENDPOINT: ${{ vars.REACT_APP_SPEECH_TO_TEXT_WS_ENDPOINT_PROD }}
+
+    - name: Setup AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.ACCESS_KEY_ID_PROD }}
+        aws-secret-access-key: ${{ secrets.SECRET_ACCESS_KEY_PROD }}
+        aws-region: ${{ vars.REGION_PROD }}
+
+    - name: Deploy to UAT S3
+      run: aws s3 sync build/ s3://${{ secrets.BUCKET_NAME_PROD }} --delete
+
+    - name: Invalidate UAT CloudFront Cache
+      run: |
+        aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID_PROD }} --paths "/*"
